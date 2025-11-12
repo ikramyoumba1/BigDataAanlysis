@@ -1,0 +1,44 @@
+Step 1: Build the image:
+docker build -t yourusername/tp3-powerbi:v1 .
+
+# Ensuring the image builds successfully
+docker images
+
+# Creating a Custom Network
+docker network create tp3-network
+docker run -d --name pb1 --network powerbi-net -p 8081:80 yourusername/tp3-powerbi:v1
+
+
+# Available Networks
+docker network ls
+
+Step2:Creating and running the three containers with port assignment
+
+# The first container
+docker run -d --name tp3-container-1 --network tp3-network -p 8080:80 your-username/tp3-bigdata-app:v1.0
+
+# The second container
+docker run -d --name tp3-container-2 --network tp3-network -p 8081:80 your-username/tp3-bigdata-app:v1.0
+
+# The third container
+docker run -d --name tp3-container-3 --network tp3-network -p 8082:80 your-username/tp3-bigdata-app:v1.0
+
+Step3:Checking the containers' operation
+
+# Show all active containers
+docker ps
+
+# Check network connection
+docker network inspect tp3-network
+
+# Test containers
+curl http://localhost:8080
+curl http://localhost:8081
+curl http://localhost:8082
+
+# Show container logs (to ensure they are running)
+docker logs tp3-container-1
+docker logs tp3-container-2
+docker logs tp3-container-3
+
+
