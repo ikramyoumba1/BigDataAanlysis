@@ -1,0 +1,48 @@
+docker ps -a
+
+docker logs cassandra
+
+docker exec -it cassandra cqlsh
+
+USE resto_NY;
+
+TRUNCATE Restaurant;
+TRUNCATE Inspection;
+
+-- استيراد أول 1000 صف فقط
+COPY Restaurant (id, name, borough, buildingnum, street, zipcode, phone, cuisinetype)
+FROM '/restaurants.csv' 
+WITH DELIMITER=',' 
+AND HEADER=TRUE
+AND MAXROWS=1000;
+
+SELECT * FROM Restaurant LIMIT 5;
+
+SELECT * FROM Restaurant;
+
+SELECT name FROM Restaurant;
+
+SELECT name, borough FROM Restaurant WHERE id = 41569764;
+
+SELECT inspectiondate, grade FROM Inspection WHERE idrestaurant = 41569764;
+
+SELECT name FROM Restaurant WHERE borough = 'BROOKLYN' ALLOW FILTERING;
+
+SELECT COUNT(*) FROM Inspection;
+
+SELECT COUNT(*) FROM Restaurant LIMIT 1000;
+
+SELECT name FROM Restaurant WHERE cuisinetype = 'French' ALLOW FILTERING;
+
+SELECT * FROM Inspection WHERE idrestaurant = 41569764;
+
+SELECT cuisinetype, COUNT(*) 
+FROM Restaurant 
+WHERE cuisinetype IN ('American', 'Chinese', 'Italian') 
+ALLOW FILTERING;
+
+SELECT grade, score FROM Inspection WHERE idrestaurant = 41569764 AND score >= 10 ALLOW FILTERING;
+
+SELECT grade, score FROM Inspection WHERE grade != '' AND score > 30 ALLOW FILTERING;
+
+SELECT COUNT(*) FROM Inspection WHERE grade != '' AND score > 30 ALLOW FILTERING;
