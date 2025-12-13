@@ -1,0 +1,76 @@
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export HADOOP_HOME=/usr/local/hadoop
+export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+export SPARK_HOME=/opt/spark
+export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$SPARK_HOME/bin
+
+source ~/.bashrc
+
+HDFS:
+
+hdfs --daemon start namenode
+hdfs --daemon start datanode
+hdfs --daemon start secondarynamenode
+
+jps
+
+echo "Hello Spark Wordcount" > file1.txt
+echo "Hello Hadoop Also" >> file1.txt
+hdfs dfs -put -f file1.txt /
+hdfs dfs -ls /
+
+spark-shell
+
+val lines = sc.textFile("hdfs://localhost:8020/file1.txt")
+val words = lines.flatMap(_.split("\\s+"))
+val wc = words.map(w => (w,1)).reduceByKey(_+_)
+wc.collect().foreach(println)
+
+hdfs dfs -ls /file1.count
+hdfs dfs -cat /file1.count/part-00000
+
+
+Wordcount:
+cd ~/wordcount-spark
+ls input
+
+spark-submit \
+  --class spark.batch.tp21.WordCountTask \
+  --master local \
+  target/wordcount-spark-1.0-SNAPSHOT.jar \
+  input/purchases.txt \
+  out-spark-java
+
+ls out-spark-java
+cat out-spark-java/part-00000
+
+
+nano input/purchases.txt
+
+rm -r out-spark-java 2>/dev/null
+
+spark-submit \
+  --class spark.batch.tp21.WordCountTask \
+  --master local \
+  target/wordcount-spark-1.0-SNAPSHOT.jar \
+  file:$(pwd)/input/purchases.txt \
+  file:$(pwd)/out-spark-java
+
+ls out-spark-java
+cat out-spark-java/part-00000
+
+Spark Streaming:
+
+cd ~/stream-spark
+
+Terminal 1
+nc -lk 9999
+
+Terminal 2
+cd ~/stream-spark
+
+spark-submit \
+  --class spark.streaming.tp22.Stream \
+  --master local \
+  target/stream-1.0-SNAPSHOT.jar
+
